@@ -5,20 +5,20 @@ var path = require('path')
 var yaml = require('js-yaml')
 
 var extensions = ['.yml', '.yaml']
-var cache = {}
+var ymlCache = {}
 
 var compile = function(fullname) {
   return yaml.load(fs.readFileSync(fullname, 'utf8'))
 }
 
 var load = function(target, cache) {
-  var content = cache[fullname]
+  var content = ymlCache[fullname]
   var fullname = convert2fullname(target)
   // from cache
   if (cache === true || process.env.NODE_ENV === 'production' && cache !== false) {
-    content = cache[fullname]
+    content = ymlCache[fullname]
     if (!content) {
-      content = cache[fullname] = compile(fullname)
+      content = ymlCache[fullname] = compile(fullname)
     }
   } else {
     content = compile(fullname)

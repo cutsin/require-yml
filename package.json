@@ -1,6 +1,6 @@
 {
   "name": "require-yml",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "simple js-yaml shell for load YAML/YML files",
   "main": "index.js",
   "scripts": {

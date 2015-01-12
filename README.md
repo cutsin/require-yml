@@ -25,7 +25,7 @@ With cache:
 ```javascript
 var json = require('require-yml')('./foo.yml', true)
 ```
-Disable cache if NODE_ENV=production:
+Disable cache if `NODE_ENV=production`:
 ```javascript
 var json = require('require-yml')('./foo.yaml', false)
 ```
