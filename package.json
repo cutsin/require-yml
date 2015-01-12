@@ -1,0 +1,24 @@
+{
+  "name": "require-yml",
+  "version": "0.0.1",
+  "description": "simple js-yaml shell for load YAML/YML files",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test"
+  },
+  "keywords": [
+    "require",
+    "yaml",
+    "yml"
+  ],
+  "repository": "cutsin/require-yml",
+  "author": "Cutsin <cutsin@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cutsin/require-yml/issues"
+  },
+  "homepage": "https://github.com/cutsin/require-yml",
+  "dependencies": {
+    "js-yaml": "~3.2.5"
+  }
+}
