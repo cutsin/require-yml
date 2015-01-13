@@ -29,7 +29,7 @@ var load = function(target, cache) {
 var convert2fullname = function(target){
   var dirname, basename
   // absolute path
-  if (/^(\/|[a-zA-Z]]:)/.test(target)) {
+  if (/^(\/|[a-zA-Z]:)/.test(target)) {
     dirname = path.dirname(target)
     basename = path.basename(target)
   // relative path
