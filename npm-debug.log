@@ -1,0 +1,68 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/home/vagrant/.nvm/v0.10.35/bin/node',
+1 verbose cli   '/home/vagrant/.nvm/v0.10.35/bin/npm',
+1 verbose cli   'publish' ]
+2 info using npm@1.4.28
+3 info using node@v0.10.35
+4 verbose publish [ '.' ]
+5 verbose cache add [ '.', null ]
+6 verbose cache add name=undefined spec="." args=[".",null]
+7 verbose parsed url { protocol: null,
+7 verbose parsed url   slashes: null,
+7 verbose parsed url   auth: null,
+7 verbose parsed url   host: null,
+7 verbose parsed url   port: null,
+7 verbose parsed url   hostname: null,
+7 verbose parsed url   hash: null,
+7 verbose parsed url   search: null,
+7 verbose parsed url   query: null,
+7 verbose parsed url   pathname: '.',
+7 verbose parsed url   path: '.',
+7 verbose parsed url   href: '.' }
+8 silly lockFile 3a52ce78- .
+9 verbose lock . /home/vagrant/.npm/3a52ce78-.lock
+10 verbose tar pack [ '/home/vagrant/.npm/require-yml/0.0.3/package.tgz', '.' ]
+11 verbose tarball /home/vagrant/.npm/require-yml/0.0.3/package.tgz
+12 verbose folder .
+13 info prepublish require-yml@0.0.3
+14 silly lockFile 1f1177db-tar tar://.
+15 verbose lock tar://. /home/vagrant/.npm/1f1177db-tar.lock
+16 silly lockFile f73028ce-pm-require-yml-0-0-3-package-tgz tar:///home/vagrant/.npm/require-yml/0.0.3/package.tgz
+17 verbose lock tar:///home/vagrant/.npm/require-yml/0.0.3/package.tgz /home/vagrant/.npm/f73028ce-pm-require-yml-0-0-3-package-tgz.lock
+18 silly lockFile 1f1177db-tar tar://.
+19 silly lockFile 1f1177db-tar tar://.
+20 silly lockFile f73028ce-pm-require-yml-0-0-3-package-tgz tar:///home/vagrant/.npm/require-yml/0.0.3/package.tgz
+21 silly lockFile f73028ce-pm-require-yml-0-0-3-package-tgz tar:///home/vagrant/.npm/require-yml/0.0.3/package.tgz
+22 silly lockFile 1842d5e5-nt-npm-require-yml-0-0-3-package /home/vagrant/.npm/require-yml/0.0.3/package
+23 verbose lock /home/vagrant/.npm/require-yml/0.0.3/package /home/vagrant/.npm/1842d5e5-nt-npm-require-yml-0-0-3-package.lock
+24 silly lockFile 1842d5e5-nt-npm-require-yml-0-0-3-package /home/vagrant/.npm/require-yml/0.0.3/package
+25 silly lockFile 1842d5e5-nt-npm-require-yml-0-0-3-package /home/vagrant/.npm/require-yml/0.0.3/package
+26 silly lockFile 3a52ce78- .
+27 silly lockFile 3a52ce78- .
+28 silly publish { name: 'require-yml',
+28 silly publish   version: '0.0.3',
+28 silly publish   description: 'simple js-yaml shell for load YAML/YML files',
+28 silly publish   main: 'index.js',
+28 silly publish   scripts: { test: 'node test' },
+28 silly publish   keywords: [ 'require', 'yaml', 'yml' ],
+28 silly publish   repository: { type: 'git', url: 'https://github.com/cutsin/require-yml' },
+28 silly publish   author: { name: 'Cutsin', email: 'cutsin@gmail.com' },
+28 silly publish   license: 'MIT',
+28 silly publish   bugs: { url: 'https://github.com/cutsin/require-yml/issues' },
+28 silly publish   homepage: 'https://github.com/cutsin/require-yml',
+28 silly publish   dependencies: { 'js-yaml': '~3.2.5' },
+28 silly publish   readme: '# require-yml\r\n\r\n[![NPM Version][npm-image]][npm-url]\r\n[![NPM Downloads][downloads-image]][downloads-url]\r\n[![Build Status][travis-image]][travis-url]\r\n\r\n## Why?\r\n\r\nIt\'s instead of [require-yaml](https://www.npmjs.com/package/require-yaml) because of this reason: __http://nodejs.org/api/globals.html#globals_require_extensions__\r\n\r\n## Install\r\n\r\n```\r\nnpm install require-yml\r\n```\r\n\r\n## Usage\r\n\r\n```javascript\r\nvar json = require(\'require-yml\')(\'./foo\')\r\nconsole.log(config)\r\n// >> json object {}\r\n```\r\nWith cache:\r\n```javascript\r\nvar json = require(\'require-yml\')(\'./foo.yml\', true)\r\n```\r\nDisable cache if `NODE_ENV=production`:\r\n```javascript\r\nvar json = require(\'require-yml\')(\'./foo.yaml\', false)\r\n```\r\n\r\n\r\n## Test\r\n\r\n```\r\nnpm test\r\n```\r\n\r\n## License\r\n\r\n[MIT](LICENSE)\r\n\r\n[npm-image]: https://img.shields.io/npm/v/require-yml.svg?style=flat\r\n[npm-url]: https://npmjs.org/package/require-yml\r\n[travis-image]: https://travis-ci.org/cutsin/require-yml.svg\r\n[travis-url]: https://travis-ci.org/cutsin/require-yml\r\n[downloads-image]: https://img.shields.io/npm/dm/require-yml.svg?style=flat\r\n[downloads-url]: https://npmjs.org/package/require-yml\r\n',
+28 silly publish   readmeFilename: 'README.md',
+28 silly publish   gitHead: '004bf1f410f7960fe5287e93312d1cc7f6e5a798',
+28 silly publish   _id: 'require-yml@0.0.3',
+28 silly publish   _shasum: '14421854eca38bcfe3705fa385d3b8a7e0050d26',
+28 silly publish   _from: '.' }
+29 error need auth auth and email required for publishing
+29 error need auth You need to authorize this machine using `npm adduser`
+30 error System Linux 2.6.32-431.el6.x86_64
+31 error command "/home/vagrant/.nvm/v0.10.35/bin/node" "/home/vagrant/.nvm/v0.10.35/bin/npm" "publish"
+32 error cwd /vagrant/public/require-yml
+33 error node -v v0.10.35
+34 error npm -v 1.4.28
+35 error code ENEEDAUTH
+36 verbose exit [ 1, true ]

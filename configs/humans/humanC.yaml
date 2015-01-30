@@ -1,0 +1,9 @@
+# it's a human.
+
+head: true
+body: 
+  arms: 2
+  leg:
+    - 'left'
+    - 'right'
+foot: false

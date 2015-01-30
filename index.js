@@ -2,55 +2,59 @@
 
 var fs = require('fs')
 var path = require('path')
-var yaml = require('js-yaml')
+var parser = require('js-yaml')
 
-var extensions = ['.yml', '.yaml']
-var ymlCache = {}
+var extensions = ['.yml', '.yaml', '.json']
 
-var compile = function(fullname) {
-  return yaml.load(fs.readFileSync(fullname, 'utf8'))
+var fullpath = function(_path) {
+  if (path.resolve(_path) === _path) {
+    return _path
+  }
+  return path.join(process.cwd(), _path)
 }
 
-var load = function(target, cache) {
-  var content = ymlCache[fullname]
-  var fullname = convert2fullname(target)
-  // from cache
-  if (cache === true || process.env.NODE_ENV === 'production' && cache !== false) {
-    content = ymlCache[fullname]
-    if (!content) {
-      content = ymlCache[fullname] = compile(fullname)
-    }
-  } else {
-    content = compile(fullname)
+var readSync = function(target) {
+  target = fullpath(target)
+  // read specificed file
+  if (/\.(yml|yaml)$/.test(target)) {
+    return parser.load(fs.readFileSync(target, 'utf8'))
+  } else if (/\.(json)$/.test(target)) {
+    try {
+      return require(target)
+    } catch (e) {}
   }
-  return content
-}
 
-var convert2fullname = function(target){
-  var dirname, basename
-  // absolute path
-  if (/^(\/|[a-zA-Z]:)/.test(target)) {
-    dirname = path.dirname(target)
-    basename = path.basename(target)
-  // relative path
-  } else {
-    dirname = path.dirname(require.main.filename)
-    basename = target
-  }
-  // specified extension
-  if (/\.(yml|yaml)$/.test(basename)) {
-    return path.resolve(dirname, basename)
- 
-  } else if (/\/$/.test(basename)) {
-  // try unspecified extension's exists
-  } else {
-    for(var i=0,n=extensions.length; i<n; i++){
-      var exists = path.resolve(dirname, basename + extensions[i])
-      if (fs.existsSync(exists)) {
-        return exists
+  // read directory's files
+  if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
+    var res
+    var files = fs.readdirSync(target)
+    var len = files.length
+    if (!len) return
+    for(var i=0;i<len;i++) {
+      var file = path.resolve(target, files[i])
+      var val = read(file)
+      if (val) {
+        if (!res) res = {}
+        res[path.basename(file).split('.')[0]] = val
       }
     }
+    return res
   }
+  // try unspecified extension's exists
+  for(var i=0,len=extensions.length; i<len; i++){
+    var exists = target + extensions[i]
+    if (fs.existsSync(exists)) {
+      return read(exists)
+    }
+  }
+  // nothing matches
+  return
 }
 
-module.exports = load
+// todo: async
+var read = readSync
+
+module.exports = function(target, cb) {
+  if (typeof cb !== 'function') return readSync(target)
+  cb(read(target))
+}
