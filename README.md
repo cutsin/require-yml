@@ -5,7 +5,7 @@
 [![Build Status][travis-image]][travis-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 
-[中文文档](./README.zh-Cn.md)
+[中文文档](README.zh-CN.md)
 
 ## Why?
 
