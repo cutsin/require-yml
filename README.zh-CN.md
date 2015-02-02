@@ -5,23 +5,23 @@
 [![Build Status][travis-image]][travis-url]
 [![Test Coverage][coveralls-image]][coveralls-url]
 
-[中文文档](./README.zh-Cn.md)
+[English Doc](./README.md)
 
-## Why?
+## 为什么造了个轮子？
 
-It's instead of [require-yaml](https://www.npmjs.com/package/require-yaml) because of [this reason](http://nodejs.org/api/globals.html#globals_require_extensions).
+这个包是为了代替[require-yaml](https://www.npmjs.com/package/require-yaml)，因为[require.extensions已不被推荐使用了](http://nodejs.org/api/globals.html#globals_require_extensions)。
 
-And, it can require a yml/yaml/json file/whole directory, or with iterator, or use async callback.
+而且提供可以加载更多的文件格式（yml/yaml/json）及文件夹、支持每个配置文件迭代、支持异步加载。
 
-## Install
+## 安装
 
 ```bash
 npm install require-yml
 ```
 
-## Usage
+## 使用
 
-configs directory:
+配置文件目录结构:
 ```bash
 configs/
  |- foo/
@@ -35,7 +35,7 @@ configs/
 var req = require('require-yml')
 ```
 
-### require a file (yml/yaml/json)
+### 加载单个文件（yml/yaml/json）
 
 ```javascript
 var yml = req('./configs/foo/bar/a.yml')
@@ -45,7 +45,7 @@ console.log(yml, yaml, json)
 // >> {}, {}, {}
 ```
 
-### require a directory
+### 加载整个目录
 
 ```javascript
 var all = req('./configs')
@@ -53,7 +53,7 @@ console.log(all)
 // >> json object {"foo":{"bar":[Object Object]}
 ```
 
-### require an empty file/directory
+### 加载空文件/文件夹
 
 ```javascript
 var empty = req('./configs/empty')
@@ -61,7 +61,7 @@ console.log(empty)
 // >> undefined
 ```
 
-### require with iterator
+### 迭代每个文件
 
 ```javascript
 var iterator = function(json) {
@@ -73,7 +73,7 @@ console.log(yml.foo.bar.a.inject)
 // >> 'everywhere'
 ```
 
-### async require
+### 异步加载
 
 ```javascript
 req('./configs', null, function(yml){
@@ -82,7 +82,7 @@ req('./configs', null, function(yml){
 // >> {}
 ```
 
-## Test
+## 测试
 
 ```
 npm test
