@@ -6,6 +6,8 @@ var parser = require('js-yaml')
 
 var extensions = ['.yml', '.yaml', '.json']
 
+var noop = function(json){return json}
+
 var fullpath = function(_path) {
   if (path.resolve(_path) === _path) {
     return _path
@@ -13,14 +15,17 @@ var fullpath = function(_path) {
   return path.join(process.cwd(), _path)
 }
 
-var readSync = function(target) {
+var read = function(target, iterator) {
+  if (!iterator) iterator = noop
   target = fullpath(target)
   // read specificed file
   if (/\.(yml|yaml)$/.test(target)) {
-    return parser.load(fs.readFileSync(target, 'utf8'))
+    var res = parser.load(fs.readFileSync(target, 'utf8'))
+    return res && iterator(res)
   } else if (/\.(json)$/.test(target)) {
     try {
-      return require(target)
+      var res = require(target)
+      return res && iterator(res)
     } catch (e) {}
   }
 
@@ -32,10 +37,10 @@ var readSync = function(target) {
     if (!len) return
     for(var i=0;i<len;i++) {
       var file = path.resolve(target, files[i])
-      var val = read(file)
+      var val = read(file, iterator)
       if (val) {
         if (!res) res = {}
-        res[path.basename(file).split('.')[0]] = val
+        res[path.basename(file).replace(path.extname(file), '')] = val
       }
     }
     return res
@@ -44,17 +49,22 @@ var readSync = function(target) {
   for(var i=0,len=extensions.length; i<len; i++){
     var exists = target + extensions[i]
     if (fs.existsSync(exists)) {
-      return read(exists)
+      return read(exists, iterator)
     }
   }
   // nothing matches
   return
 }
 
-// todo: async
-var read = readSync
+var readAsync = function(target, iterator, cb) {
+  process.nextTick(function(){
+    cb(read(target, iterator))
+  })
+}
 
-module.exports = function(target, cb) {
-  if (typeof cb !== 'function') return readSync(target)
-  cb(read(target))
+module.exports = function(target, iterator, cb) {
+  if (typeof cb !== 'function') {
+    return read(target, iterator)
+  }
+  readAsync.apply(null, arguments)
 }

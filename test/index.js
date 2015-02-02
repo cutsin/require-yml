@@ -45,4 +45,19 @@ assert.ok(yaml.head === true)
 var yaml = req('./configs/humans/humanC')
 assert.ok(yaml.head === true)
 
+// iterator
+var iterator = function(json) {
+	if (json.head) delete json.head
+	json.inject = 'everywhere'
+	return json
+}
+var yml = req('./configs', iterator)
+assert.equal(yml.humans.humanC.head)
+assert.ok(yml.foo.sth.inject === 'everywhere')
+
+// async
+req('./configs', null, function(yml){
+	assert.ok(yml.foo.bar)
+})
+
 console.log('test ok.')

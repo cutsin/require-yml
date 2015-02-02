@@ -9,7 +9,7 @@
 
 It's instead of [require-yaml](https://www.npmjs.com/package/require-yaml) because of [this reason](http://nodejs.org/api/globals.html#globals_require_extensions).
 
-And, it can load a yml|yaml|json file or whole directory.
+And, it can require a yml/yaml/json file/whole directory, or with iterator, or use async callback.
 
 ## Install
 
@@ -31,29 +31,54 @@ configs/
 ```
 ```javascript
 var req = require('require-yml')
-
-// require a yml file
-var yml = req('./configs/foo/bar/b.yml')
-console.log(yml)  // json object {}
-
-// require a no extension yaml file
-var yaml = req('./configs/foo/bar/b')
-console.log(yaml)  // json object {}
-
-// require whole directory
-var all = req('./configs')
-console.log(all)  // json object {"foo":{"bar":[Object Object]}
-
-// require a empty directory
-var empty = req('./configs/empty')
-console.log(empty)  // undefined
-
 ```
 
+### require a file (yml/yaml/json)
 
-## Todo
+```javascript
+var yml = req('./configs/foo/bar/a.yml')
+var yaml = req('./configs/foo/bar/b')	// b.yaml
+var json = req('./configs/foo/bar/c.json')
+console.log(yml, yaml, json)
+// >> {}, {}, {}
+```
 
-Async support.
+### require a directory
+
+```javascript
+var all = req('./configs')
+console.log(all)
+// >> json object {"foo":{"bar":[Object Object]}
+```
+
+### require an empty file/directory
+
+```javascript
+var empty = req('./configs/empty')
+console.log(empty)
+// >> undefined
+```
+
+### require with iterator
+
+```javascript
+var iterator = function(json) {
+	json.inject = 'everywhere'
+	return json
+}
+var yml = req('./configs', iterator)
+console.log(yml.foo.bar.a.inject)
+// >> 'everywhere'
+```
+
+### async require
+
+```javascript
+req('./configs', null, function(yml){
+	console.log(yml.foo.bar.a)
+})
+// >> {}
+```
 
 ## Test
 
