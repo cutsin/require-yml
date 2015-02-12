@@ -20,13 +20,15 @@ var read = function(target, iterator) {
   target = fullpath(target)
   // read specificed file
   if (/\.(yml|yaml)$/.test(target)) {
-    var res = parser.load(fs.readFileSync(target, 'utf8'))
-    return res && iterator(res)
+    try {
+      var res = parser.load(fs.readFileSync(target, 'utf8'))
+      return res && iterator(res)
+    } catch (e) { return }
   } else if (/\.(json)$/.test(target)) {
     try {
       var res = require(target)
       return res && iterator(res)
-    } catch (e) {}
+    } catch (e) { return }
   }
 
   // read directory's files
