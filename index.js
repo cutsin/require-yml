@@ -59,7 +59,7 @@ var read = function(target, iterator) {
 }
 
 var readAsync = function(target, iterator, cb) {
-  process.nextTick(function(){
+  setImmediate(function(){
     cb(read(target, iterator))
   })
 }
