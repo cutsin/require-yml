@@ -26,9 +26,13 @@ var read = function(target, iterator) {
       var res = parser.load(fs.readFileSync(target, 'utf8'))
       return res && iterator(res)
     } catch (e) { return }
-  } else if (/\.(json)$/.test(target)) {
+  } else if (/\.(json|js)$/.test(target)) {
     try {
-      var res = require(target)
+      var res = require(target);
+      
+      if (typeof res == 'function')
+        res = res();
+        
       return res && iterator(res)
     } catch (e) { return }
   }
