@@ -18,7 +18,6 @@ var fullpath = function(_path) {
 var read = function(target, iterator) {
   if (!iterator) iterator = noop
   
-  console.log('target', target);
   target = fullpath(target)
   // read specificed file
   if (/\.(yml|yaml)$/.test(target)) {
