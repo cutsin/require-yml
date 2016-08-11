@@ -4,7 +4,7 @@ var fs = require('fs')
 var path = require('path')
 var parser = require('js-yaml')
 
-var extensions = ['.yml', '.yaml', '.json']
+var extensions = ['.yml', '.yaml', '.json', '.js']
 
 var noop = function(json){return json}
 
