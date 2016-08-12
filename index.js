@@ -4,7 +4,7 @@ var fs = require('fs')
 var path = require('path')
 var parser = require('js-yaml')
 
-var extensions = ['.yml', '.yaml', '.json']
+var extensions = ['.yml', '.yaml', '.json', '.js']
 
 var noop = function(json){return json}
 
@@ -17,6 +17,7 @@ var fullpath = function(_path) {
 
 var read = function(target, iterator) {
   if (!iterator) iterator = noop
+  
   target = fullpath(target)
   // read specificed file
   if (/\.(yml|yaml)$/.test(target)) {
@@ -24,9 +25,13 @@ var read = function(target, iterator) {
       var res = parser.load(fs.readFileSync(target, 'utf8'))
       return res && iterator(res)
     } catch (e) { return }
-  } else if (/\.(json)$/.test(target)) {
+  } else if (/\.(json|js)$/.test(target)) {
     try {
-      var res = require(target)
+      var res = require(target);
+      
+      if (typeof res == 'function')
+        res = res();
+        
       return res && iterator(res)
     } catch (e) { return }
   }
