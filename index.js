@@ -29,9 +29,6 @@ var read = function(target, iterator) {
     try {
       var res = require(target);
       
-      if (typeof res == 'function')
-        res = res();
-        
       return res && iterator(res)
     } catch (e) { return }
   }
