@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/cutsin/require-yml",
   "dependencies": {
-    "js-yaml": "~3.2.5"
+    "js-yaml": "~3.13.0"
   }
 }
