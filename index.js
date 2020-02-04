@@ -65,12 +65,13 @@ var readAsync = function(target, iterator, cb) {
   })
 }
 
-req.onLoadError = () => {}
-module.exports = req
-
-function req(target, iterator, cb) {
+var req = function(target, iterator, cb) {
   if (typeof cb !== 'function') {
     return read(target, iterator)
   }
   readAsync.apply(null, arguments)
 }
+req.onLoadError = function() {}
+
+module.exports = req
+

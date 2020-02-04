@@ -7,7 +7,7 @@
 
 [中文文档](README.zh-CN.md)
 
-## Why?
+## Why
 
 It's instead of [require-yaml](https://www.npmjs.com/package/require-yaml) because of [this reason](http://nodejs.org/api/globals.html#globals_require_extensions).
 
@@ -22,15 +22,17 @@ npm install require-yml
 ## Usage
 
 configs directory:
-```bash
+
+```sh
 configs/
- |- foo/
+  |- foo/
     |- bar/
       |- a.yml
       |- b.yaml
       |- c.json
     |- empty/
 ```
+
 ```javascript
 var req = require('require-yml')
 ```
@@ -39,7 +41,7 @@ var req = require('require-yml')
 
 ```javascript
 var yml = req('./configs/foo/bar/a.yml')
-var yaml = req('./configs/foo/bar/b')	// b.yaml
+var yaml = req('./configs/foo/bar/b')  // b.yaml
 var json = req('./configs/foo/bar/c.json')
 console.log(yml, yaml, json)
 // >> {}, {}, {}
@@ -65,8 +67,8 @@ console.log(empty)
 
 ```javascript
 var iterator = function(json) {
-	json.inject = 'everywhere'
-	return json
+  json.inject = 'everywhere'
+  return json
 }
 var yml = req('./configs', iterator)
 console.log(yml.foo.bar.a.inject)
@@ -76,15 +78,14 @@ console.log(yml.foo.bar.a.inject)
 ### handle require or iterator errors
 
 ```javascript
-
 var yml = req('./configs', function brokenIterator(json) { 
-   a = b // -> throws `a is undefined`
+  a = b // -> throws `a is undefined`
 })
 req.onLoadError = function(err) {
-   //handle your errors here
-   switch(e.CODE) { 
-      ...
-   }
+  // handle your errors here
+  switch(e.CODE) {
+    ...
+  }
 }
 ```
 
@@ -92,14 +93,14 @@ req.onLoadError = function(err) {
 
 ```javascript
 req('./configs', null, function(yml){
-	console.log(yml.foo.bar.a)
+  console.log(yml.foo.bar.a)
 })
 // >> {}
 ```
 
 ## Test
 
-```
+```sh
 npm test
 ```
 

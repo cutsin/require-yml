@@ -7,7 +7,7 @@
 
 [English Doc](./README.md)
 
-## 为什么造了个轮子？
+## 为什么造了个轮子
 
 这个包是为了代替[require-yaml](https://www.npmjs.com/package/require-yaml)，因为[require.extensions已不被推荐使用了](http://nodejs.org/api/globals.html#globals_require_extensions)。
 
@@ -22,15 +22,17 @@ npm install require-yml
 ## 使用
 
 配置文件目录结构:
-```bash
+
+```sh
 configs/
- |- foo/
+  |- foo/
     |- bar/
       |- a.yml
       |- b.yaml
       |- c.json
     |- empty/
 ```
+
 ```javascript
 var req = require('require-yml')
 ```
@@ -39,7 +41,7 @@ var req = require('require-yml')
 
 ```javascript
 var yml = req('./configs/foo/bar/a.yml')
-var yaml = req('./configs/foo/bar/b')	// b.yaml
+var yaml = req('./configs/foo/bar/b') // b.yaml
 var json = req('./configs/foo/bar/c.json')
 console.log(yml, yaml, json)
 // >> {}, {}, {}
@@ -65,26 +67,40 @@ console.log(empty)
 
 ```javascript
 var iterator = function(json) {
-	json.inject = 'everywhere'
-	return json
+  json.inject = 'everywhere'
+  return json
 }
 var yml = req('./configs', iterator)
 console.log(yml.foo.bar.a.inject)
 // >> 'everywhere'
 ```
 
+### 异常处理
+
+```javascript
+var yml = req('./configs', function brokenIterator(json) { 
+   a = b // -> 抛出 `a is undefined`
+})
+req.onLoadError = function(err) {
+  // 异常处理
+  switch(e.CODE) {
+    ...
+  }
+}
+```
+
 ### 异步加载
 
 ```javascript
 req('./configs', null, function(yml){
-	console.log(yml.foo.bar.a)
+  console.log(yml.foo.bar.a)
 })
 // >> {}
 ```
 
 ## 测试
 
-```
+```sh
 npm test
 ```
 
