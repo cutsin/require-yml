@@ -24,13 +24,12 @@ var read = function(target, iterator) {
     try {
       var res = parser.load(fs.readFileSync(target, 'utf8'))
       return res && iterator(res)
-    } catch (e) { return }
+    } catch (e) { return req.onLoadError(e) }
   } else if (/\.(json|js)$/.test(target)) {
     try {
       var res = require(target);
-      
       return res && iterator(res)
-    } catch (e) { return }
+    } catch (e) { return req.onLoadError(e) }
   }
 
   // read directory's files
@@ -66,7 +65,10 @@ var readAsync = function(target, iterator, cb) {
   })
 }
 
-module.exports = function(target, iterator, cb) {
+req.onLoadError = () => {}
+module.exports = req
+
+function req(target, iterator, cb) {
   if (typeof cb !== 'function') {
     return read(target, iterator)
   }
