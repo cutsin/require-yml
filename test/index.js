@@ -55,6 +55,13 @@ var yml = req('./configs', iterator)
 assert.equal(yml.humans.humanC.head)
 assert.ok(yml.foo.sth.inject === 'everywhere')
 
+var mockError = new Error('oups!')
+var err
+req.onLoadError = function(e) { err = e }
+var yml = req('./configs', function(json) { throw mockError })
+assert.ok(err === mockError)
+req.onLoadError = function() {}
+
 // async
 req('./configs', null, function(yml){
 	assert.ok(yml.foo.bar)
