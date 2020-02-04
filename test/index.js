@@ -55,6 +55,7 @@ var yml = req('./configs', iterator)
 assert.equal(yml.humans.humanC.head)
 assert.ok(yml.foo.sth.inject === 'everywhere')
 
+// broken iterator - error handling
 var mockError = new Error('oups!')
 var err
 req.onLoadError = function(e) { err = e }
