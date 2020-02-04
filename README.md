@@ -73,6 +73,21 @@ console.log(yml.foo.bar.a.inject)
 // >> 'everywhere'
 ```
 
+### handle require or iterator errors
+
+```javascript
+
+var yml = req('./configs', function brokenIterator(json) { 
+   a = b // -> throws `a is undefined`
+})
+req.onLoadError = function(err) {
+   //handle your errors here
+   switch(e.CODE) { 
+      ...
+   }
+}
+```
+
 ### async require
 
 ```javascript
