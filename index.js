@@ -1,77 +1,78 @@
 // require-yml
+const { isArray } = Array
+const { assign } = Object
+const fs = require('fs')
+const path = require('path')
+const parser = require('js-yaml')
 
-var fs = require('fs')
-var path = require('path')
-var parser = require('js-yaml')
+const read = (options) => {
 
-var extensions = ['.yml', '.yaml', '.json', '.js']
+  const {
+    target,
+    onLoadError = req.onLoadError,
+    onItrError = onLoadError,
+    extensions = ['.yml', '.yaml', '.json', '.js'],
+    loaders = [],
+    cwd = process.cwd(),
+    resolvePath = target => path.resolve(target) === target ? target : path.join(cwd, target),
+    readFiles = files => files.slice(1).reduce((current, target) => merge(current, readPath(target)), readPath(files[0])),
+    mapper = json => json,
+    fileToProp = file => path.basename(file).replace(path.extname(file), ''),
+    merge = (current, loaed) => assign(current, loaded),
+  } = options
 
-var noop = function(json){return json}
+  loaders.push(
+    { pattern: /\.(yml|yaml)$/, load: target => parser.load(fs.readFileSync(resolvePath(target), 'utf8')) },
+    { pattern: /\.(json|js)$/, load: target => require(resolvePath(target)) },
+  )
 
-var fullpath = function(_path) {
-  if (path.resolve(_path) === _path) {
-    return _path
-  }
-  return path.join(process.cwd(), _path)
-}
+  return isArray(target) ? readFiles(target) : readPath(target)
 
-var read = function(target, iterator) {
-  if (!iterator) iterator = noop
-  
-  target = fullpath(target)
-  // read specificed file
-  if (/\.(yml|yaml)$/.test(target)) {
-    try {
-      var res = parser.load(fs.readFileSync(target, 'utf8'))
-      return res && iterator(res)
-    } catch (e) { return req.onLoadError(e) }
-  } else if (/\.(json|js)$/.test(target)) {
-    try {
-      var res = require(target);
-      return res && iterator(res)
-    } catch (e) { return req.onLoadError(e) }
-  }
+  function readPath(target) {
+    let res
 
-  // read directory's files
-  if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
-    var res
-    var files = fs.readdirSync(target)
-    var len = files.length
-    if (!len) return
-    for(var i=0;i<len;i++) {
-      var file = path.resolve(target, files[i])
-      var val = read(file, iterator)
-      if (val) {
-        if (!res) res = {}
-        res[path.basename(file).replace(path.extname(file), '')] = val
-      }
+    //read a signle file
+    const loader = loaders.find(({ pattern }) => pattern.test(target))
+    if (loader) {
+      try {
+        res = loader.load(target)
+      } catch (e) { return onLoadError(assign(e, { target })) }
+
+      try {
+        return res && mapper(res, target)
+      } catch (e) { return onItrError(assign(e, { target, loaded: res })) }
     }
-    return res
-  }
-  // try unspecified extension's exists
-  for(var i=0,len=extensions.length; i<len; i++){
-    var exists = target + extensions[i]
-    if (fs.existsSync(exists)) {
-      return read(exists, iterator)
+
+    // read directory's files
+    if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
+      const files = fs.readdirSync(target)
+      if (!files.length) return
+
+      return files.reduce((current, file) => {
+        const val = readPath(path.resolve(target, file))
+        if (val) current[fileToProp(file)] = val
+        return current
+      }, {})
     }
+
+    // try unspecified extension's exists
+    const found = extensions.filter(ext => fs.existsSync(target + ext))
+    if (!found.length) return
+
+    return readFiles(found.map(ext => target + ext))
   }
-  // nothing matches
-  return
 }
 
-var readAsync = function(target, iterator, cb) {
-  setImmediate(function(){
-    cb(read(target, iterator))
-  })
+const req = (options, fileMapper, cb) => {
+  if ('object' == typeof options && !isArray(options) && 'function' == typeof fileMapper && !cb) [fileMapper, cb] = [null, fileMapper]
+  if ('string' == typeof options || isArray(options)) options = { target: options }
+  if ('function' == typeof fileMapper) options.mapper = fileMapper
+
+  if ('function' == typeof cb) return process.nextTick(() => cb(read(options)))
+
+  return read(options)
 }
 
-var req = function(target, iterator, cb) {
-  if (typeof cb !== 'function') {
-    return read(target, iterator)
-  }
-  readAsync.apply(null, arguments)
-}
-req.onLoadError = function() {}
+req.onLoadError = () => {}
 
 module.exports = req
-
