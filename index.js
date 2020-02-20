@@ -6,9 +6,9 @@ const path = require('path')
 const parser = require('js-yaml')
 
 const read = (options) => {
-
   const {
-    target,
+    targets,
+    target = targets,
     onLoadError = req.onLoadError,
     onItrError = onLoadError,
     extensions = ['.yml', '.yaml', '.json', '.js'],
@@ -18,7 +18,7 @@ const read = (options) => {
     readFiles = files => files.slice(1).reduce((current, target) => merge(current, readPath(target)), readPath(files[0])),
     mapper = json => json,
     fileToProp = file => path.basename(file).replace(path.extname(file), ''),
-    merge = (current, loaed) => assign(current, loaded),
+    merge = (current, loaded) => assign(current, loaded),
   } = options
 
   loaders.push(
@@ -39,7 +39,7 @@ const read = (options) => {
       } catch (e) { return onLoadError(assign(e, { target })) }
 
       try {
-        return res && mapper(res, target)
+        return res && mapper(res, { prop: fileToProp(target), target })
       } catch (e) { return onItrError(assign(e, { target, loaded: res })) }
     }
 
@@ -48,11 +48,15 @@ const read = (options) => {
       const files = fs.readdirSync(target)
       if (!files.length) return
 
-      return files.reduce((current, file) => {
-        const val = readPath(path.resolve(target, file))
-        if (val) current[fileToProp(file)] = val
-        return current
-      }, {})
+      return files.filter(file => !extensions.find(ext => file.endsWith(ext))) //unrecognized ext. + directories
+        .concat(...extensions.map( ext => files.filter(file => file.endsWith(ext))))   //ext files by injected order
+        .reduce((current, file, ix, arr) => {
+          const val = readPath(path.resolve(target, file))
+          const prop = fileToProp(file)
+          const curVal = current[prop]
+          if (val) current[prop] = curVal ? merge(curVal, val) : val
+          return current
+        }, {})
     }
 
     // try unspecified extension's exists
