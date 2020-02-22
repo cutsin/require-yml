@@ -76,12 +76,18 @@ var yml = req(['./configs/humans', './config/foo'])
 //should add all paths and merge them to the same object
 assert.deepEqual(Object.keys(yml).sort(), [ 'human-a', 'human.b', 'humanC', 'lowb' ])
 
+
 //options as a directory with few files with different extensions
 var yml = req('./configs/ext')
 //should add all paths and merge them to the same object
 assert.ok(yml.baz.js)
 assert.ok(yml.baz.yaml) //both loaded
 assert.ok(yml.baz.name == 'baz-js') //yaml took precedence
+
+//when called with options with .target and .targets - should understand
+var yml1 = req({ target: './config/root.yaml'})
+var yml2 = req({ targets: ['./config/root.yaml']})
+assert.equal(yml1, yml2)
 
 //options as a directory with few files with different extensions - user control extension presedence - unrecognized is weakest, last is strongest
 var yml = req({ target: './configs/ext', extensions: ['.js', '.yml', '.yaml', '.json']})
@@ -100,6 +106,21 @@ var yml = req({ target: './configs', mapper })
 assert.equal(yml.humans.humanC.head, undefined)
 assert.ok(yml.foo.sth.inject === 'everywhere')
 
+//iterator in options and a callback
+var mapper = function(json) {
+	if (json.head) delete json.head
+	json.inject = 'everywhere'
+	return json
+}
+var yml = req({ target: './configs', mapper }, function(yml){
+  assert.equal(yml.humans.humanC.head, undefined)
+  assert.ok(yml.foo.sth.inject === 'everywhere')
+	assert.ok(yml.foo.bar)
+})
 
+//target includes an empty dir
+try { require('fs').mkdirSync('./configs/ext/empty') } catch (e) {}
+var yml = req('./configs/ext.empty')
+assert.equal(yml, undefined)
 
 console.log('test ok.')
