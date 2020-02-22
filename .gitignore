@@ -6,9 +6,8 @@ yarn-debug.log*
 yarn.lock
 npm.lock
 yarn-error.log*
-test/unit/coverage
-test/e2e/reports
-selenium-debug.log
+coverage
+.nyc_output
 
 # Editor directories and files
 Thumbs.db
