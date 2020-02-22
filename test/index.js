@@ -52,7 +52,7 @@ var iterator = function(json) {
 	return json
 }
 var yml = req('./configs', iterator)
-assert.equal(yml.humans.humanC.head)
+assert.equal(yml.humans.humanC.head, undefined)
 assert.ok(yml.foo.sth.inject === 'everywhere')
 
 // broken iterator - error handling - using global onLoadError
@@ -97,7 +97,7 @@ var mapper = function(json) {
 	return json
 }
 var yml = req({ target: './configs', mapper })
-assert.equal(yml.humans.humanC.head)
+assert.equal(yml.humans.humanC.head, undefined)
 assert.ok(yml.foo.sth.inject === 'everywhere')
 
 
