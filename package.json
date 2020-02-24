@@ -1,6 +1,6 @@
 {
   "name": "require-yml",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "description": "Load a yml/yaml/json file or whole directory",
   "main": "index.js",
   "scripts": {

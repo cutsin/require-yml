@@ -11,7 +11,7 @@ const read = (options) => {
     target = targets,
     onLoadError = req.onLoadError,
     onItrError = onLoadError,
-    extensions = ['.yml', '.yaml', '.json', '.js'],
+    extensions = ['.js', '.yml', '.yaml', '.json'],
     loaders = [],
     cwd = process.cwd(),
     resolvePath = target => path.resolve(target) === target ? target : path.join(cwd, target),
@@ -31,7 +31,7 @@ const read = (options) => {
   function readPath(target) {
     let res
 
-    //read a signle file
+    //read a signle file of recognized extension
     const loader = loaders.find(({ pattern }) => pattern.test(target))
     if (loader) {
       try {
@@ -59,7 +59,7 @@ const read = (options) => {
         }, {})
     }
 
-    // try unspecified extension's exists
+    //unrecognized ext - try appendable extensions
     const found = extensions.filter(ext => fs.existsSync(target + ext))
     if (!found.length) return
 
