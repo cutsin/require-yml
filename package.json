@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "description": "Load a yml/yaml/json file or whole directory",
   "main": "index.js",
+  "files": ["index.js"],
   "scripts": {
     "test": "node test",
     "cover": "nyc node test | coveralls"
