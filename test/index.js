@@ -1,8 +1,7 @@
 const assert = require('assert')
 const req = require('../')
-let cases = 0;
-let failed = 0;
-[{
+
+const v1Cases = [{
   title: 'require a directory - should return the directiry loaded recursvely',
   test: () => {
     var configs = req('./configs')
@@ -101,13 +100,9 @@ let failed = 0;
       assert.ok(yml.foo.bar)
     })
   }
-}].forEach(runCase)
+}]
 
-console.log(`
-features of v2.x
-`);
-
-[{
+const v2Cases = [{
   title: 'options as an array of directory paths - should add all paths and merge them to the same object',
   test: () => {
     var yml = req(['./configs/humans', './config/foo'])
@@ -162,7 +157,7 @@ features of v2.x
       json.inject = 'everywhere'
       return json
     }
-    req({ target: './configs', mapper }, function(yml){
+    req({ target: './configs', mapper }, function(yml) {
       assert.equal(yml.humans.humanC.head, undefined)
       assert.ok(yml.foo.sth.inject === 'everywhere')
       assert.ok(yml.foo.bar)
@@ -175,8 +170,22 @@ features of v2.x
     var yml = req('./configs/ext.empty')
     assert.equal(yml, undefined)
   }
-}].forEach(runCase)
+}]
 
+let cases = 0;
+let failed = 0;
+
+const FAIL = '\u001b[31mNOK\u001b[39m'
+const PASS = '\u001b[32mOK\u001b[39m'
+console.log(`
+features of v1.x:
+`)
+v1Cases.forEach(runCase)
+
+console.log(`
+features of v2.x
+`)
+v2Cases.forEach(runCase)
 
 console.log(`
 
@@ -184,45 +193,43 @@ console.log(`
 `)
 
 process.nextTick(() => {
-  console.log('%s\ttests ran\n %s\ttests failed', cases, failed)
+  console.log(`
+Summary:
+  %s\ttests ran
+  %s\ttests failed`, cases, failed ? FAIL.replace('NOK', failed) : PASS.replace('OK', 0))
   process.exit(failed)
 })
 
 function runCase({title, async: asyncTest, test}) {
   const caseNo = ++cases;
   let err
+  const catchErr = uncaught => err = uncaught
 
-  console.log('\ncase %s\t- %s', caseNo, title)
-
-  if (asyncTest) { 
-     process.on('error', catchErr)
-     process.nextTick(() => {
-       process.removeListener('error', catchErr)
-       console.log('\ncase %s\t- ASYNC: %s', caseNo, title)
-       if (err) { 
-         failed++;
-         return console.error(err)
-       } 
-       console.log('\t- OK')
-     })
+  if (asyncTest) {
+    process.on('uncaughtException', catchErr)
   }
 
   try {
     test()
-    console.log(asyncTest ? '\t- <async>' : '\t- OK')
+    asyncTest || console.log('%s [%s] %s', caseNo, PASS, title)
   } catch (e) {
     err = e
     failed++;
-    return console.error(err)
+    return console.error('%s [%s] %s:\n', caseNo, FAIL, title, err)
   }
 
-  function catchErr(uncaught) {
-    err = uncaught
+  if (asyncTest) {
+    process.nextTick(() => {
+      process.removeListener('uncaughtException', catchErr)
+      if (err) {
+        failed++;
+        return console.error('%s [%s] (async) %s\n', caseNo, FAIL, title, err)
+      }
+      console.log('%s [%s] (async) %s', caseNo, PASS, title)
+    })
   }
 }
-
 
 function cleanupRequireCache() {
   Object.keys(require.cache).forEach(k => { delete require.cache[k] }) //cleanup require cache
 }
-
