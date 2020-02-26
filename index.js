@@ -10,15 +10,18 @@ const read = (options) => {
     targets,
     target = targets,
     onLoadError = req.onLoadError,
-    onItrError = onLoadError,
+    onMapperError = onLoadError,
     extensions = ['.js', '.yml', '.yaml', '.json'],
     loaders = [],
-    cwd = process.cwd(),
-    resolvePath = target => path.resolve(target) === target ? target : path.join(cwd, target),
-    readFiles = files => files.slice(1).reduce((current, target) => merge(current, readPath(target)), readPath(files[0])),
+    rootDir = process.cwd(),
+    resolvePath = target => path.resolve(target) === target ? target : path.join(rootDir, target),
+    merge = (current, loaded) => assign(current, loaded),
+    readFiles = files => {
+      const vals = files.map(readPath).filter(v => v)
+      return vals.length ? vals.reduce((current, val) => merge(current, val)) : undefined
+    },
     mapper = json => json,
     fileToProp = file => path.basename(file).replace(path.extname(file), ''),
-    merge = (current, loaded) => assign(current, loaded),
   } = options
 
   loaders.push(
@@ -26,11 +29,10 @@ const read = (options) => {
     { pattern: /\.(json|js)$/, load: target => require(resolvePath(target)) },
   )
 
-  return isArray(target) ? readFiles(target) : readPath(target)
+  return isArray(target) ? readFiles(target.map(resolvePath)) : readPath(target)
 
   function readPath(target) {
     let res
-
     //read a signle file of recognized extension
     const loader = loaders.find(({ pattern }) => pattern.test(target))
     if (loader) {
@@ -40,7 +42,7 @@ const read = (options) => {
 
       try {
         return res && mapper(res, { prop: fileToProp(target), target })
-      } catch (e) { return onItrError(assign(e, { target, loaded: res })) }
+      } catch (e) { return onMapperError(assign(e, { target, loaded: res })) }
     }
 
     // read directory's files

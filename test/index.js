@@ -105,8 +105,8 @@ const v1Cases = [{
 const v2Cases = [{
   title: 'options as an array of directory paths - should add all paths and merge them to the same object',
   test: () => {
-    var yml = req(['./configs/humans', './config/foo'])
-    assert.deepEqual(Object.keys(yml).sort(), [ 'human-a', 'human.b', 'humanC', 'lowb' ])
+    var yml = req(['./configs/ext', './configs/humans'])
+    assert.deepEqual(Object.keys(yml).sort(), [ 'baz', 'human-a', 'human.b', 'humanC', 'lowb' ])
   }
 }, {
   title: 'options as a directory with few files with different extensions - should add all paths and merge them to the same object',
@@ -132,9 +132,29 @@ const v2Cases = [{
 }, {
   title: 'when called with options with .targets - should understand the synonim for .target',
   test: () => {
-    var yml1 = req({ target: './config/root.yaml'})
-    var yml2 = req({ targets: ['./config/root.yaml']})
+    var yml1 = req({ target: './configs/root.yaml'})
+    var yml2 = req({ targets: ['./configs/root.yaml']})
     assert.equal(yml1, yml2)
+  }
+}, {
+  title: 'called with path or paths that lead nowhere - should return undefined',
+  test: () => {
+    var nothing = req({ target: [ './no/where', './no/such/path' ], onLoadError: () => {} })
+    assert.equal(nothing, undefined)
+  },
+}, {
+  title: 'when called custom merger - should use the custom merger',
+  test: () => {
+    var count = 0
+    var yml = req({
+      targets: ['./configs/root.yaml', '/configs/base.yaml'],
+      merge: (cur, v) => {
+        if ('string' == typeof cur) cur = { ['str' + ++count ]: cur }
+        if ('string' == typeof v) v = { ['str' + ++count ]: v }
+        return { ...cur, ...v }        
+      }
+    })
+    assert.deepEqual(yml, { str1: 'yaml is good', str2: 'yaml is awsome' })
   }
 }, {
   title: 'iterator passed in options - should be recognized',
@@ -152,7 +172,7 @@ const v2Cases = [{
   title: 'passed iterator in options and a callback - should recognize callback',
   async: true,
   test: () => {
-    var mapper = function(json) {
+    var mapper = function(json, path) {
       if (json.head) delete json.head
       json.inject = 'everywhere'
       return json
@@ -164,11 +184,120 @@ const v2Cases = [{
     })
   }
 }, {
-  title: 'target includes an absolutely empty dir',
+  title: 'when provided a mapper - mapper should be provided also with meta of { prop, target }',
+  test: () => {
+    var props = []
+    var paths = []
+    var mapper = (v, {prop, target}) => {
+      props.push(prop)
+      paths.push(target.replace(/^.*[\/\\]/,''))
+      return v
+    }
+
+    req({ target: './configs/ext', mapper })
+    
+    assert.deepEqual(props, ['baz','baz'])
+    assert.deepEqual(paths, ['baz.js','baz.yaml'])
+  }
+}, {
+  title: 'target that includes an absolutely empty dir - should not effect',
   test: () => {
     try { require('fs').mkdirSync('./configs/ext/empty') } catch (e) {}
-    var yml = req('./configs/ext.empty')
+    const yml = req('./configs/ext.empty')
     assert.equal(yml, undefined)
+  }
+}, {
+  title: 'passed a custom onLoadError - should use it. errors are augmented with .target',
+  test: () => {
+    const targets = []
+    req({ target: './configs', onLoadError: e => targets.push(e.target.replace(/^.*[\/\\]/,'')) })
+    
+    assert.deepEqual( targets, ['nothing.json', 'broken.yaml'])
+  }
+}, {
+  title: 'passed an onMapError and error occurs in mapper - should use it. errors are augmented with target',
+  test: () => {
+    const messages = []
+    const targets = []
+    const cfg = req({
+      target: './configs/root',
+      mapper: () => { throw new Error('oups...') },
+      onMapperError: ({message, target}) => {
+        messages.push(message)
+        targets.push(target.replace(/^.*[\/\\]/,''))
+      },
+    })
+    assert.equal(messages[0], 'oups...')
+    assert.equal(targets[0], 'root.yaml')
+  }
+}, {
+  title: 'passed no onMapError and error occurs in mapper - should use onLoadError. errors are augmented with target',
+  test: () => {
+    const messages = []
+    const targets = []
+    const cfg = req({
+      target: './configs/root',
+      mapper: () => { throw new Error('oups!') },
+      onLoadError: ({message, target}) => {
+        messages.push(message)
+        targets.push(target.replace(/^.*[\/\\]/,''))
+      },
+    })
+    assert.equal(messages[0], 'oups!')
+    assert.equal(targets[0], 'root.yaml')
+  }
+}, {
+  title: 'provided custom loaders - should use them, shaddowing built-in loaders',
+  test: () => {
+    try {
+      const fs = require('fs')
+      const resolvePath = target => target
+
+      const people = req({
+        target: './configs/humans/',
+        loaders: [{ 
+          pattern: /\.(yml|yaml)$/,
+          //load: target =>  console.log('cus', target) || Object.assign(parser.load(fs.readFileSync(resolvePath(target), 'utf8')), { src: target, customYml: true })
+          load: target =>  ({  customYml: true, src: target, text: fs.readFileSync(resolvePath(target), 'utf8') })
+        }],
+        onLoadError: console.log,
+      })
+      
+      assert.ok(people['human-a'].customYml)
+      assert.ok(people['human.b'].customYml)
+      assert.ok(people['humanC'].customYml)
+
+    } finally {
+      cleanupRequireCache()
+    }
+  }
+}, {
+  title: 'when provided a directory target and `fileToProp` - should use it',
+  test: () => {
+    const people = req({
+      target: './configs/humans/',
+      fileToProp: f => require('lodash/camelCase')(f.replace(/\.[^.]{2,4}$/,'')),
+    })
+    
+    assert.deepEqual(Object.keys(people), ['lowb', 'humanA', 'humanB', 'humanC'])
+  }
+}, {
+  title: 'when provided absolute rootDir - should use it', 
+  test: () => {
+    const cfg = req({
+      rootDir: require('path').join(process.cwd(), 'configs'),
+      targets: [ 'ext', 'foo' ]
+    })
+    assert.deepEqual( Object.keys(cfg), ['baz', 'bar', 'sth'] )
+  }
+}, {
+  title: 'when provided relative rootDir - should use it',
+  test: () => {
+    const cfg = req({
+      rootDir: './configs',
+      targets: [ 'ext', 'foo' ]
+    })
+    assert.deepEqual( Object.keys(cfg), ['baz', 'bar', 'sth'] )
   }
 }]
 
