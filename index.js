@@ -69,7 +69,7 @@ const read = (options) => {
 }
 
 const req = (options, mapper, cb) => {
-  if ('object' == typeof options && !isArray(options) && 'function' == typeof fileMapper && !cb) [fileMapper, cb] = [null, fileMapper]
+  if ('object' == typeof options && !isArray(options) && 'function' == typeof mapper && !cb) [mapper, cb] = [null, mapper]
   if ('string' == typeof options || isArray(options)) options = { target: options }
   if ('function' == typeof mapper) options.mapper = mapper
 
@@ -78,6 +78,6 @@ const req = (options, mapper, cb) => {
   return read(options)
 }
 
-req.onLoadError = () => {}
+req.onLoadError = e => { throw e }
 
 module.exports = req

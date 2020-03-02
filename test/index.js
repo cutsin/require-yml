@@ -96,8 +96,8 @@ const v1Cases = [{
   title: 'called with an "async" callback',
   async: true,
   test: () => {
-    req('./configs', null, function(yml){
-      assert.ok(yml.foo.bar)
+    req('./configs/ext', null, function(yml){
+      assert.ok(yml.baz)
     })
   }
 }]
@@ -157,19 +157,19 @@ const v2Cases = [{
     assert.deepEqual(yml, { str1: 'yaml is good', str2: 'yaml is awsome' })
   }
 }, {
-  title: 'iterator passed in options - should be recognized',
+  title: 'mapper passed in options - should be recognized',
   test: () => {
     var mapper = function(json) {
       if (json.head) delete json.head
       json.inject = 'everywhere'
       return json
     }
-    var yml = req({ target: './configs', mapper })
-    assert.equal(yml.humans.humanC.head, undefined)
-    assert.ok(yml.foo.sth.inject === 'everywhere')
+    var yml = req({ target: './configs/humans', mapper })
+    assert.ok(yml.humanC)
+    assert.equal(yml.humanC.head, undefined)
   }
 }, {
-  title: 'passed iterator in options and a callback - should recognize callback',
+  title: 'mapper passed in options and a callback - should recognize callback',
   async: true,
   test: () => {
     var mapper = function(json, path) {
@@ -177,10 +177,11 @@ const v2Cases = [{
       json.inject = 'everywhere'
       return json
     }
-    req({ target: './configs', mapper }, function(yml) {
-      assert.equal(yml.humans.humanC.head, undefined)
-      assert.ok(yml.foo.sth.inject === 'everywhere')
-      assert.ok(yml.foo.bar)
+    req({ target: './configs/humans', mapper }, (yml) => {
+      assert.ok(yml['human-a'])
+      assert.ok(yml['human.b'])
+      assert.ok(yml.humanC)
+      assert.equal(yml.humanC.head, undefined)
     })
   }
 }, {
@@ -257,10 +258,8 @@ const v2Cases = [{
         target: './configs/humans/',
         loaders: [{ 
           pattern: /\.(yml|yaml)$/,
-          //load: target =>  console.log('cus', target) || Object.assign(parser.load(fs.readFileSync(resolvePath(target), 'utf8')), { src: target, customYml: true })
           load: target =>  ({  customYml: true, src: target, text: fs.readFileSync(resolvePath(target), 'utf8') })
         }],
-        onLoadError: console.log,
       })
       
       assert.ok(people['human-a'].customYml)
@@ -286,7 +285,8 @@ const v2Cases = [{
   test: () => {
     const cfg = req({
       rootDir: require('path').join(process.cwd(), 'configs'),
-      targets: [ 'ext', 'foo' ]
+      targets: [ 'ext', 'foo' ],
+      onLoadError: () => {},
     })
     assert.deepEqual( Object.keys(cfg), ['baz', 'bar', 'sth'] )
   }
@@ -295,7 +295,8 @@ const v2Cases = [{
   test: () => {
     const cfg = req({
       rootDir: './configs',
-      targets: [ 'ext', 'foo' ]
+      targets: [ 'ext', 'foo' ],
+      onLoadError: () => {},
     })
     assert.deepEqual( Object.keys(cfg), ['baz', 'bar', 'sth'] )
   }
@@ -306,11 +307,14 @@ let failed = 0;
 
 const FAIL = '\u001b[31mNOK\u001b[39m'
 const PASS = '\u001b[32mOK\u001b[39m'
+const origOnErr = req.onLoadError
+req.onLoadError = () => {}
 console.log(`
 features of v1.x:
 `)
 v1Cases.forEach(runCase)
 
+req.onLoadError = origOnErr
 console.log(`
 features of v2.x
 `)

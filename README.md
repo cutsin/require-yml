@@ -18,6 +18,9 @@ And, it can require a yml/yaml/json file/whole directory, or with iterator, or u
 ```bash
 npm install require-yml
 ```
+## Breaking changes in `2.0.0`
+ - version `1.x` defaults to *suppresses* load/parse errors, version `2.x` defaults to *throw* them.
+ - `v1.4.x` and `v2.x` let you provide your own error handlers: restore original behavior by providing your own `onLoadError` as an empty function.
 
 ## Usage
 
