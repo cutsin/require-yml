@@ -67,6 +67,7 @@ const yml = req(['./config/default', './configs/local'])
    Banner.prototype.header = function(title) { return this.text.replace(/@TITLE/, title) }
    ```
    ```yaml
+   #file: config/strategies/banner.yaml
    Banner:
      prototype:
        header: |
@@ -75,7 +76,7 @@ const yml = req(['./config/default', './configs/local'])
          -----------------------
    ```
 
-### require a list of files, but you control what extensions to try and in what order 
+### require a list of files with unspecified endings, but you control what extensions to try and in what order 
 
 ```javascript
 const yml = req({ 
@@ -83,7 +84,12 @@ const yml = req({
   extensions: [ '.json', '.yaml' ]
 })
 ```
-* When more than one is found - the later cascades
+* results in try loading:
+  - `./config/default.json`
+  - `./config/default.yaml`
+  - `./config/local.json`
+  - `./config/local.yaml`
+* values in a later file merge into earlier, the later cascades
 
 ### Provide your own custom loaders
 
@@ -99,15 +105,15 @@ const yml = req({
 ```
 
 ***Notes***: 
- * user loaders precede built-in ones.
+ * user loaders precede built-in ones. Loader of first matched pattern is used.
    The built-in loaders are:
    ```
      { pattern: /\.(yml|yaml)$/, load: target => jsYaml.load(fs.readFileSync(resolvePath(target), 'utf8')) },
      { pattern: /\.(json|js)$/, load: target => require(resolvePath(target)) },
    ```
- * order of `loaders` does not effect order of files (order of `extensions` does, but only between files of same name in same directory)
- * You may support custom extensions by providing both `extensions` and custom `loaders`
-
+ * order of `loaders` does not effect order of loaded files (order of `extensions` does, and only between files in same directory)
+ * You can support custom extensions by providing `loaders`
+ * You can have the tool try your custom extensions for paths you provide without extension by including it in `extensions`
 
 ### require a directory
 
@@ -125,24 +131,47 @@ console.log(empty)
 // >> undefined
 ```
 
-### require with iterator
+### require with a mapper iterator
 
 ```javascript
-const iterator = function(json) {
+const mapper = function(json) {
   json.inject = 'everywhere'
   return json
 }
-const yml = req('./configs', iterator)
-console.log(yml.foo.bar.a.inject)
+// v >= 2.0
+const yml2 = req({ target: './configs', mapper })
+console.log(yml2.foo.bar.a.inject)
 // >> 'everywhere'
+
+// legacy form (supported for backward compatibility)
+const yml1 = req('./configs', mapper)
+console.log(yml1.foo.bar.a.inject)
+
 ```
+
+ * mapper iterator is called for every value that is loaded before being added to the value tree.
+ * use mappers to map or mutate loaded values.
+ * suppress loaded values by returning a falsy value.
+
 
 ### handle require or iterator errors
 
 ```javascript
-const yml = req('./configs', function brokenIterator(json) { 
-  a = b // -> throws `a is undefined`
+const yml = req({
+  target: './configs',
+  mapper: function broken(json) { 
+    a = b // -> throws `a is undefined`
+  },
+  onLoadError: err => {
+    // handle your errors here
+    switch(e.CODE) {
+      ...
+    }
+  },
 })
+```
+or use the global hook:
+```
 req.onLoadError = function(err) {
   // handle your errors here
   switch(e.CODE) {
@@ -159,6 +188,7 @@ req('./configs', null, function(yml){
 })
 // >> {}
 ```
+***Note:*** operation is pseudo async. 
 
 
 ## Test
