@@ -143,11 +143,11 @@ const v2Cases = [{
     assert.equal(nothing, undefined)
   },
 }, {
-  title: 'when called custom merger - should use the custom merger',
+  title: 'when provided with a custom merger - should use the custom merger',
   test: () => {
     var count = 0
     var yml = req({
-      targets: ['./configs/root.yaml', '/configs/base.yaml'],
+      targets: ['./configs/root.yaml', './configs/base.yaml'],
       merge: (cur, v) => {
         if ('string' == typeof cur) cur = { ['str' + ++count ]: cur }
         if ('string' == typeof v) v = { ['str' + ++count ]: v }

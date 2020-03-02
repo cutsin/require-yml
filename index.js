@@ -39,7 +39,6 @@ const read = (options) => {
       try {
         res = loader.load(target)
       } catch (e) { return onLoadError(assign(e, { target })) }
-
       try {
         return res && mapper(res, { prop: fileToProp(target), target })
       } catch (e) { return onMapperError(assign(e, { target, loaded: res })) }
@@ -69,10 +68,10 @@ const read = (options) => {
   }
 }
 
-const req = (options, fileMapper, cb) => {
+const req = (options, mapper, cb) => {
   if ('object' == typeof options && !isArray(options) && 'function' == typeof fileMapper && !cb) [fileMapper, cb] = [null, fileMapper]
   if ('string' == typeof options || isArray(options)) options = { target: options }
-  if ('function' == typeof fileMapper) options.mapper = fileMapper
+  if ('function' == typeof mapper) options.mapper = mapper
 
   if ('function' == typeof cb) return process.nextTick(() => cb(read(options)))
 
