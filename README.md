@@ -63,7 +63,7 @@ const yml = req(['./config/default', './configs/local'])
 ***Notes***: 
  - by default, tool tries extensions by this order: `.js`, `.yml`, `.yaml`, `.json`.
    All found are merged on each other, the later *cascades*.
- - the built-in `.js` first - gives you more power allowing to starting with a type that is not native to `yaml`/`json`,  e.g:
+ - the built-in `.js` first - gives you more power allowing to start with a type that is not native to `yaml`/`json`,  e.g:
    ```javascript
    //file: config/strategies/banner.js
    module.export = function Banner() { }
@@ -73,7 +73,7 @@ const yml = req(['./config/default', './configs/local'])
    #file: config/strategies/banner.yaml
    Banner:
      prototype:
-       header: |
+       text: |
          -----------------------
          |     @TITLE          |
          -----------------------
@@ -87,12 +87,18 @@ const yml = req({
   extensions: [ '.json', '.yaml' ]
 })
 ```
-* results in try loading:
-  - `./config/default.json`
-  - `./config/default.yaml`
-  - `./config/local.json`
-  - `./config/local.yaml`
+* this results in try the following load order:
+  * try as dir `./config/default/`
+    else try files: 
+     * `./config/default.json`
+     * `./config/default.yaml`
+  * try as dir: `./config/local/`
+	  else try files: 
+     * `./config/local.json`
+     * `./config/local.yaml`
 * values in a later file merge into earlier, the later cascades
+* Mind the difference between this example and `req({targets: ['/config'], ...})`. 
+  Both return a single value, but the former merges all files together, and the later returns an object with keys `default` and `local`, each of which is a merge of the `yaml` version cascading the `json` version.
 
 ### Provide your own custom loaders
 
