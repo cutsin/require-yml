@@ -131,6 +131,7 @@ const yml = req({
  * `file` provided to `fileToProp` is a full absolute path as it appears on your OS
  * what `fileToProp(file)` returns is used as property name
  * if there is already a value there - it is merged into and cascaded by the current.
+ * **Note:** `targets` is a synonym for `target` for readability . Each can be provided as a string or as an array of strings. If you provide both - `target` is used, `targets` is ignored. When it's provided as a string - it's understood as a list of files with a single-element.
 
 ### Provide your own custom loaders
 
