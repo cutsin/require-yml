@@ -73,23 +73,25 @@ console.log(empty)
 ```javascript
 const yml = req(['./config/default.yml', './configs/local.yml'])
 ```
+* having directories in these names will cause an error you should handle. We don't know of such use-case, but if you ever encounter one - you may provide your own loaders for the pattern `/\.yml$/` - see below)
 
 ### require a list of files, the later cascades, but let the tool guess extensions
 ```javascript
 const yml = req(['./config/default', './configs/local'])
 ```
 ***Notes***: 
- - by default, tool tries extensions by this order: `.js`, `.yml`, `.yaml`, `.json`.
+ - by default, tool tries extensions by this order: `.js`, `.yml`, `.yaml`, `.json`, `/` (dir)
    All found are merged on each other, the later *cascades*.
- - the built-in `.js` first - gives you more power allowing to start with a type that is not native to `yaml`/`json`,  e.g:
+ - the built-in `.js` first - gives you more power allowing to start with a type that is not native to `json` or safe-mode `yaml`,  e.g:
    ```javascript
-   //file: config/strategies/banner.js
-   module.export = function Banner() { }
-   Banner.prototype.header = function(title) { return this.text.replace(/@TITLE/, title) }
+   //file: config/strategies/cli-banner.js
+   module.export = function CliBanner() { }
+	 CliBanner.prototype.text = '@TITLE'
+   CliBanner.prototype.header = function(title) { return this.text.replace(/@TITLE/, title) }
    ```
-   ```yaml
-   #file: config/strategies/banner.yaml
-   Banner:
+	 ```yaml
+   #file: config/strategies/cli-banner.yaml
+   CliBanner:
      prototype:
        text: |
          -----------------------
@@ -105,7 +107,7 @@ const yml = req({
   extensions: [ '.json', '.yaml' ]
 })
 ```
-* this results in try the load order below, where each stage treats ites previous as defaults and ***cascades*** it with it's own values, whenever such are found:
+* this results in try the load order below, where each stage treats it's previous as defaults and ***cascades*** it with it's own values, whenever such are found:
 	* file: `./config/default.json` 
 	* file:`./config/default.yaml`
   * directory: `./config/default/`
@@ -171,7 +173,6 @@ const yml1 = req('./configs', mapper)
 console.log(yml1.foo.bar.a.inject)
 
 ```
-
  * mapper iterator is called for every value that is loaded before being added to the value tree.
  * use mappers to map or mutate loaded values.
  * suppress loaded values by returning a falsy value.
@@ -194,7 +195,7 @@ const yml = req({
 })
 ```
 or use the global hook:
-```
+```javascript
 req.onLoadError = function(err) {
   // handle your errors here
   switch(e.CODE) {
