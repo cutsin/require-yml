@@ -44,6 +44,12 @@ const read = (options) => {
       } catch (e) { return onMapperError(assign(e, { target, loaded: res })) }
     }
 
+    //unspecified ext - try provided extensions
+    const foundFiles = extensions.filter(ext => fs.existsSync(target + ext)).map(ext => target + ext)
+    const val = foundFiles.length 
+      ? readFiles(foundFiles)
+      : undefined
+
     // read directory's files
     if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
       const files = fs.readdirSync(target)
@@ -57,14 +63,11 @@ const read = (options) => {
           const curVal = current[prop]
           if (val) current[prop] = curVal ? merge(curVal, val) : val
           return current
-        }, {})
+        }, val || {})
     }
 
-    //unrecognized ext - try appendable extensions
-    const found = extensions.filter(ext => fs.existsSync(target + ext))
-    if (!found.length) return
-
-    return readFiles(found.map(ext => target + ext))
+    //no match - ignore
+    return val
   }
 }
 
