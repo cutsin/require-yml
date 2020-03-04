@@ -221,6 +221,14 @@ req('./configs', null, function(yml){
 npm test
 ```
 
+Test outputs numbered test cases. Numbered test-cases can be used to filter ran tests.
+
+```sh
+node test 15,18
+```
+will run only cases 15,18.
+
+
 ## License
 
 [MIT](LICENSE)

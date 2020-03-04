@@ -1,7 +1,7 @@
 const assert = require('assert')
 const req = require('../')
 
-const v1Cases = [{
+let v1Cases = [{
   title: 'require a directory - should return the directiry loaded recursvely',
   test: () => {
     var configs = req('./configs')
@@ -102,7 +102,7 @@ const v1Cases = [{
   }
 }]
 
-const v2Cases = [{
+let v2Cases = [{
   title: 'options as an array of directory paths - should add all paths and merge them to the same object',
   test: () => {
     var yml = req(['./configs/ext', './configs/humans'])
@@ -304,6 +304,13 @@ const v2Cases = [{
 
 let cases = 0;
 let failed = 0;
+const filter = (process.argv[2] || "").split(',').filter(n => n.trim()).map(n => Number(n.trim()))
+console.log('filter', filter)
+if (filter.length) {
+  const v1Len = v1Cases.length
+  v1Cases = v1Cases.map((c,ix) => ({ ...c, caseNo: ix + 1  })).filter(c => filter.includes(c.caseNo))
+  v2Cases = v2Cases.map((c,ix) => ({ ...c, caseNo: ix + 1 + v1Len })).filter(c => filter.includes(c.caseNo))
+}
 
 const FAIL = '\u001b[31mNOK\u001b[39m'
 const PASS = '\u001b[32mOK\u001b[39m'
@@ -333,8 +340,7 @@ Summary:
   process.exit(failed)
 })
 
-function runCase({title, async: asyncTest, test}) {
-  const caseNo = ++cases;
+function runCase({title, async: asyncTest, test, caseNo = ++cases}) {
   let err
   const catchErr = uncaught => err = uncaught
 
