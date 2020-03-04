@@ -125,7 +125,7 @@ const path = require('path')
 const camelCase = require('lodash/camelCase')
 const yml = req({
   target: './config',
-	fileToProp: file => camelCase(path.baseName(file))
+  fileToProp: file => camelCase(path.baseName(file))
 })
 ```
  * `file` provided to `fileToProp` is a full absolute path as it appears on your OS
