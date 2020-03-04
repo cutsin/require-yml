@@ -130,7 +130,7 @@ const yml = req({
 ```
  * `file` provided to `fileToProp` is a full absolute path as it appears on your OS
  * what `fileToProp(file)` returns is used as property name
- * if there is already a value there - it is merged into and cascades by the current.
+ * if there is already a value there - it is merged into and cascaded by the current.
 
 ### Provide your own custom loaders
 
