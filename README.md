@@ -50,7 +50,25 @@ console.log(yml, yaml, json)
 // >> {}, {}, {}
 ```
 
-### require a list of files, the later cascades
+### require a directory
+
+```javascript
+const all = req('./configs')
+console.log(all)
+// >> json object {"foo":{"bar":[Object Object]}
+```
+ * All files in the directory are required, as properties of an object.
+ * By default, the file base name as it appears on the OS is used as property name in the returned object.
+ 
+### an empty file/directory returns `undefined`
+
+```javascript
+const empty = req('./configs/empty')
+console.log(empty)
+// >> undefined
+```
+
+### require an explicit list of files, the later merges into the former and cascades
 
 ```javascript
 const yml = req(['./config/default.yml', './configs/local.yml'])
@@ -87,18 +105,30 @@ const yml = req({
   extensions: [ '.json', '.yaml' ]
 })
 ```
-* this results in try the following load order:
-  * try as dir `./config/default/`
-    else try files: 
-     * `./config/default.json`
-     * `./config/default.yaml`
-  * try as dir: `./config/local/`
-	  else try files: 
-     * `./config/local.json`
-     * `./config/local.yaml`
-* values in a later file merge into earlier, the later cascades
-* Mind the difference between this example and `req({targets: ['/config'], ...})`. 
-  Both return a single value, but the former merges all files together, and the later returns an object with keys `default` and `local`, each of which is a merge of the `yaml` version cascading the `json` version.
+* this results in try the load order below, where each stage treats ites previous as defaults and ***cascades*** it with it's own values, whenever such are found:
+	* file: `./config/default.json` 
+	* file:`./config/default.yaml`
+  * directory: `./config/default/`
+  * file: `./config/local.json`
+  * file: `./config/local.yaml`
+  * directory: `./config/local/`
+* **Note:** Mind the difference between loading a list of files and loading a directory: 
+   - *list of files* - merges the later into the former, the later cascades.
+   - *directory* - uses by default file base-names as property names, where files of same name and different extensions are basically a *list of files*.
+
+### Provide your own logic to map files to property names
+
+```javascript
+const path = require('path')
+const camelCase = require('lodash/camelCase')
+const yml = req({
+  target: './config',
+	fileToProp: file => camelCase(path.baseName(file))
+})
+```
+ * `file` provided to `fileToProp` is a full absolute path as it appears on your OS
+ * what `fileToProp(file)` returns is used as property name
+ * if there is already a value there - it is merged into and cascades by the current.
 
 ### Provide your own custom loaders
 
@@ -124,23 +154,7 @@ const yml = req({
  * You can support custom extensions by providing `loaders`
  * You can have the tool try your custom extensions for paths you provide without extension by including it in `extensions`
 
-### require a directory
-
-```javascript
-const all = req('./configs')
-console.log(all)
-// >> json object {"foo":{"bar":[Object Object]}
-```
-
-### an empty file/directory returns `undefined`
-
-```javascript
-const empty = req('./configs/empty')
-console.log(empty)
-// >> undefined
-```
-
-### require with a mapper iterator
+### apply a custom mapper to each loaded file
 
 ```javascript
 const mapper = function(json) {
@@ -163,7 +177,7 @@ console.log(yml1.foo.bar.a.inject)
  * suppress loaded values by returning a falsy value.
 
 
-### handle require or iterator errors
+### handle require or mapper errors
 
 ```javascript
 const yml = req({
@@ -197,7 +211,7 @@ req('./configs', null, function(yml){
 })
 // >> {}
 ```
-***Note:*** operation is pseudo async. 
+***Note:*** operation is pseudo async. Nothing happens in parallel, but the loading happens on next tick after your code has ran and all your declarations are made.
 
 
 ## Test
