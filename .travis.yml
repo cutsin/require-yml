@@ -1,3 +1,8 @@
 language: node_js
 node_js:
-  - '0.10'
+  - '8'  #has just retired, but lets suppport the late bloomers...
+  - '10' #conservative LTS, EOL @April 2021
+  - '12' #LTS, EOL @April 2022
+  - '13' #active dev
+
+after_success: npm run coverage

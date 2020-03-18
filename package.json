@@ -1,10 +1,12 @@
 {
   "name": "require-yml",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "description": "Load a yml/yaml/json file or whole directory",
   "main": "index.js",
+  "files": ["index.js"],
   "scripts": {
-    "test": "node test"
+    "test": "node test",
+    "cover": "nyc node test | coveralls"
   },
   "keywords": [
     "require",
@@ -21,5 +23,9 @@
   "homepage": "https://github.com/cutsin/require-yml",
   "dependencies": {
     "js-yaml": "~3.13.0"
+  },
+  "devDependencies": {
+    "coveralls": "^3.0.9",
+    "nyc": "^15.0.0"
   }
 }
