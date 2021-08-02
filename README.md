@@ -9,7 +9,7 @@
 
 ## Why
 
-It's instead of [require-yaml](https://www.npmjs.com/package/require-yaml) because of [this reason](http://nodejs.org/api/globals.html#globals_require_extensions).
+It's instead of [require-yaml](https://www.npmjs.com/package/require-yaml) because of [this reason](https://nodejs.org/api/modules.html#modules_require_extensions).
 
 And, it can require a yml/yaml/json file/whole directory, or with iterator, or use async callback.
 
